@@ -122,26 +122,106 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         Entry<T> t = (Entry<T>)find(x);
         if(t.element.compareTo(x) != 0) return null;
         super.remove(t);
+        boolean splicedEntryColor = ((Entry<T>)splicedEntry).color; 
         
-        Entry<T> removedEntry = t; //check if this get changed
         Entry<T> cursor = (Entry<T>)splicedChild;
 
-        if(removedEntry.isBlack()){
+        if(splicedEntryColor == BLACK){
             fixUp(cursor);
         }
         return x;
     }
 
     private void fixUp(Entry<T> cursor){
-        Entry<T> sibling, parent;
+        Entry<T> sibling, parent, sibling_left, sibling_right;
         while(cursor != root && cursor.isBlack()){
-            if(cursor.isLeftChild()){
+            if(cursor.isLeftChild())
+            {
                 sibling = sib(cursor);
-                if(sibling.isRed()){
+
+                if(sibling.isRed()) // Case 1
+                { 
                     sibling.color = BLACK;
                     parent = parent(cursor);
                     parent.color = RED;
                     leftRotate(parent);
+                    sibling = sib(cursor);
+                }
+                if(sibling == NIL) break;
+                sibling_left = (Entry<T>)sibling.left;
+                sibling_right = (Entry<T>)sibling.right;
+
+                if(sibling_left.isBlack() && sibling_right.isBlack()) //  Case 2
+                {
+                    sibling.color = RED;
+                    cursor = parent(cursor);
+                }
+                else
+                {
+                    if(sibling_right.isBlack())  // Case 3
+                    {
+                        sibling_left.color = BLACK;
+                        sibling.color = RED;
+                        rightRotate(sibling);
+                        sibling = sib(cursor);
+                    }
+                    if(sibling == NIL) break;
+                    sibling_left = (Entry<T>)sibling.left;
+                    sibling_right = (Entry<T>)sibling.right;
+
+                    sibling_right.color = BLACK; // Case 4
+                    parent = parent(cursor);
+                    sibling.color = parent.color;
+                    parent.color = BLACK;
+                    leftRotate(parent);
+                    cursor = (Entry<T>)root;
+                }
+            }
+            else
+            {
+                try{
+                sibling = sib(cursor);
+                }
+                catch(Exception e){
+                    throw e;
+                }
+
+                if(sibling.isRed()) // Case 1
+                {
+                    sibling.color = BLACK;
+                    parent = parent(cursor);
+                    parent.color = RED;
+                    rightRotate(parent);
+                    sibling = sib(cursor);
+                }
+                if(sibling == NIL) break;
+                sibling_left = (Entry<T>)sibling.left;
+                sibling_right = (Entry<T>)sibling.right;
+
+                if(sibling_left.isBlack() && sibling_right.isBlack()) //  Case 2
+                {
+                    sibling.color = RED;
+                    cursor = parent(cursor);
+                }
+                else
+                {
+                    if(sibling_left.isBlack())  // Case 3
+                    {
+                        sibling_right.color = BLACK;
+                        sibling.color = RED;
+                        leftRotate(sibling);
+                        sibling = sib(cursor);
+                    }
+                    if(sibling == NIL) break;
+                    sibling_left = (Entry<T>)sibling.left;
+                    sibling_right = (Entry<T>)sibling.right;
+
+                    sibling_left.color = BLACK; // Case 4
+                    parent = parent(cursor);
+                    sibling.color = parent.color;
+                    parent.color = BLACK;
+                    rightRotate(parent);
+                    cursor = (Entry<T>)root;
                 }
             }
         }
@@ -214,13 +294,23 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
     public static void main(String args[]){
         RedBlackTree<Integer> rbt = new RedBlackTree<>();
 
-        int[] input = new int[] {7,3,10,22,8,11,26,63,2,23,21,18,20,27,1,5,19};
-        
+      //  int[] input = new int[] {7,3,10,22,8,11,26,63,2,23,21,18,20,27,1,5,19};
+      int[] input = new int[] {47, 32, 71, 65,  87, 51, 82, 93};
         System.out.println();
         for(int i=0;i<input.length;i++){
             rbt.add(input[i]);
         }
-        rbt.add(1);
+        rbt.remove(87);
+        //  rbt.remove(63);
+        // rbt.remove(8);
+        // rbt.remove(27);
+        // rbt.remove(11);
+
+
+
+
+
+
         
         for(int i=0;i<input.length;i++){
             if(!rbt.contains(input[i])){

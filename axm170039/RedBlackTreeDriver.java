@@ -10,12 +10,15 @@ import java.util.Scanner;
 public class RedBlackTreeDriver {
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner sc;
-		if (args.length > 0) {
-			File file = new File(args[0]);
-			sc = new Scanner(file);
-		} else {
-			sc = new Scanner(System.in);
-		}
+
+		File file = new File("E:\\Github_Repo\\LP3\\axm170039\\test-lp3\\sk-t02.txt");
+	    sc = new Scanner(file);
+		// if (args.length > 0) {
+		// 	File file = new File(args[0]);
+		// 	sc = new Scanner(file);
+		// } else {
+		// 	sc = new Scanner(System.in);
+		// }
 		String operation = "";
 		long operand = 0;
 		int modValue = 999983;

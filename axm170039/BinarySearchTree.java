@@ -62,6 +62,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     Map<Entry<T>,Entry<T>> parents;
     Map<Entry<T>,Entry<T>> uncles;
     Entry<T> splicedChild;
+    Entry<T> splicedEntry;
     int size;
     //Stack that stores the parent of the current node during traversal
     Stack<Entry<T>> findPath;
@@ -103,7 +104,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     }
 
     private void addParent(Entry<T> child, Entry<T> parent){
-        if(!isNull(child))
+        if(child != null)
             parents.put(child,parent);
     }
 
@@ -234,7 +235,9 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     public T remove(Entry<T> t){
         T x = t.element;
         if(isNull(t.left)|| isNull(t.right))
+        {
             splice(t);
+        }
        else
        {
            findPath.push(t);
@@ -318,20 +321,22 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
      * @param t root of the subtree, the entry to be reomved
      */
     public void splice(Entry<T> t){
+        
         Entry<T> parent = findPath.peek();
         Entry<T> child = isNull(t.left) ? t.right : t.left;
+        splicedEntry = t;
         splicedChild = child;
         if(isNull(parent))
             root = child;
         else if(parent.left == t)
            { 
-               if(!isNull(child)) child.isLeftChild = true;
+               if(child != null) child.isLeftChild = true;
                parent.left = child;
                addParent(child, parent);
            }
         else 
           {
-            if(!isNull(child)) child.isLeftChild = false;
+            if(child !=  null) child.isLeftChild = false;
             parent.right = child;
             addParent(child, parent);
           }

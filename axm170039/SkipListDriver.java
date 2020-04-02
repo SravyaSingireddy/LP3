@@ -13,7 +13,7 @@ public class SkipListDriver {
 	Scanner sc;
 	//if (args.length > 0) {
 		// File file = new File(args[0]);
-		File file = new File("E:\\Github_Repo\\LP3\\axm170039\\test-lp3\\sk-t13.txt");
+		File file = new File("E:\\Github_Repo\\LP3\\axm170039\\test-lp3\\sk-t02.txt");
 	    sc = new Scanner(file);
 	// } else {
 	//     sc = new Scanner(System.in);
