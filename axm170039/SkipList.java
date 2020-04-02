@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Random;
 
 // Skeleton for skip list implementation.
-
 public class SkipList<T extends Comparable<? super T>> {
     static final int maxLevel = 32;
     Entry<T> head, tail;
@@ -16,32 +15,49 @@ public class SkipList<T extends Comparable<? super T>> {
     Random random;
     int[] span;
 
-
+    /***
+     * Entry for SkipList
+     * @param <E> Generic type, E extends comparable.
+     */
     static class Entry<E> {
-	E element;
-	Entry<E>[] next;
-    Entry prev;
-    int[] width;
+	    E element;
+	    Entry<E>[] next;
+        Entry<E> prev;
+        int[] width;
 
-	public Entry(final E x, final int lev) {
-	    element = x;
-        next = new Entry[lev];
-        width = new int[lev];
-        for(int i=0;i<lev;i++)
-            width[i] = 1;
-	}
+        /***
+         * Constructor
+         * @param x element to be stored in the skip list
+         * @param lev no of levels the element should be stored
+         */
+	    public Entry(final E x, final int lev) {
+	        element = x;
+            next = new Entry[lev];
+            width = new int[lev];
+            for(int i=0;i<lev;i++)
+                width[i] = 1;
+	    }
 
-	public E getElement() {
-	    return element;
+        /***
+         * Get property for this.element
+         * @return the element stored in the entry
+         */
+	    public E getElement() {
+	        return element;
+        }
+
+        /***
+         * returns the length of the next array which is same as the height of the entry in the skip list
+         * @return the height of the current entry
+         */
+        int height(){
+            return next.length;
+        }
     }
 
-    int height(){
-        return next.length;
-    }
-
-    }
-
-    // Constructor
+    /***
+     * Constrtuctor
+     */
     public SkipList() {
         head = new Entry<>(null, maxLevel + 1);
         tail = new Entry<>(null, maxLevel + 1);
@@ -53,6 +69,7 @@ public class SkipList<T extends Comparable<? super T>> {
                head.next[i] = tail;
                head.width[i] = 1;
            }
+        tail.prev = head;
     }
 
     private void findPred(final T x){
@@ -74,6 +91,10 @@ public class SkipList<T extends Comparable<? super T>> {
         final int height = chooseHeight();
         Entry<T> entry= new Entry<>(x,height);
         int dst = span[0];
+
+        if(pred[0].next[0] == tail){
+            tail.prev = entry;
+        }
 
         for(int i=0;i<height;i++)
         { 
@@ -101,6 +122,7 @@ public class SkipList<T extends Comparable<? super T>> {
     private int chooseHeight(){
         return 1 + random.nextInt(maxLevel);
     }
+
     // Find smallest element that is greater or equal to x
     public T ceiling(final T x) {
         if(size == 0)
@@ -177,7 +199,9 @@ public class SkipList<T extends Comparable<? super T>> {
 
     // Return last element of list (optional)
     public T last() {
-	    return get(size - 1);
+        if(size == 0)
+            return null;
+	    return tail.prev.getElement();
     }
 
  
@@ -191,6 +215,9 @@ public class SkipList<T extends Comparable<? super T>> {
         if(!contains(x)) return null;
         Entry<T> entry = pred[0].next[0];
         int height = entry.height();
+        if(entry.next[0] == tail){
+            tail.prev = pred[0];
+        }
         for(int i=0;i<height;i++)
         { 
             pred[i].next[i] = entry.next[i];
@@ -224,9 +251,7 @@ public class SkipList<T extends Comparable<? super T>> {
 
         skiplist.add(6);
 
-      //  skiplist.remove(19);
-
-
+        skiplist.remove(19);
       
 
     System.out.println();

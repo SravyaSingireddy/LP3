@@ -2,8 +2,10 @@
 package axm170039;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 /**
@@ -26,6 +28,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     static class Entry<T> {
         T element;
         Entry<T> left, right;
+        boolean isLeftChild;
 
         /***
          * Constructor
@@ -45,9 +48,20 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         public Entry(T x) {
            this(x,null,null);
         }
+
+        public boolean isLeftChild(){
+            return isLeftChild;
+        }
+
+        public boolean isRightChild(){
+            return !isLeftChild;
+        }
     }
     
     Entry<T> root;
+    Map<Entry<T>,Entry<T>> parents;
+    Map<Entry<T>,Entry<T>> uncles;
+    Entry<T> splicedChild;
     int size;
     //Stack that stores the parent of the current node during traversal
     Stack<Entry<T>> findPath;
@@ -60,16 +74,59 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 	    size = 0;
     }
 
+    private void initMap(){
+        findPath  = new Stack<>();
+        parents= new HashMap<>();
+        uncles= new HashMap<>();
+        parents.put(root, null);
+        uncles.put(root, null);
+        findPath.push(null);
+    }
+
     /***
      * Find the element x in the bst
      * @param x element to find
      * @return the entry of the element if exists in the BST, otherwise null
      */
-    private Entry<T> find(T x){
-       findPath  = new Stack<>();
-       findPath.push(null);
+    protected Entry<T> find(T x){
+       initMap();
        return find(root,x);
     }
+
+    protected Entry<T> parent(Entry<T> child){
+        return parents.get(child);
+    }
+
+    
+    protected Entry<T> uncle(Entry<T> x){
+        return uncles.get(x);
+    }
+
+    private void addParent(Entry<T> child, Entry<T> parent){
+        if(!isNull(child))
+            parents.put(child,parent);
+    }
+
+    private void addUncle(Entry<T> child, Entry<T> parent){
+        if(!isNull(child))
+        {
+            Entry<T> grandParent = parent(parent);
+            if(grandParent == null){
+                return;
+            }
+
+            if(parent.isLeftChild)
+                uncles.put(child, grandParent.right);
+            else
+                uncles.put(child, grandParent.left);
+        }
+    }
+
+    private boolean isNull(Entry<T> x){
+        return x == null || x.element == null;
+    }
+
+
 
     /***
      * Find the Entry x in the subtree at root t
@@ -82,13 +139,19 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
             return t;
         while(true){
             if(x.compareTo(t.element) < 0){
-                if(t.left == null) break;
-                findPath.push(t); t = t.left;
+                if(isNull(t.left)) break;
+                findPath.push(t); 
+                addParent(t.left, t);
+                addUncle(t.left, t);
+                t = t.left;
             }
             else if(x.compareTo(t.element) == 0) break;
             else {
-                if(t.right == null) break;
-                findPath.push(t); t = t.right;
+                if(isNull(t.right)) break;
+                findPath.push(t); 
+                addParent(t.right, t);
+                addUncle(t.right, t);
+                t = t.right;
             }
         }
         return t;
@@ -112,7 +175,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
      */
     public T get(T x) {
         Entry<T> t = find(x);
-        if(t != null && t.element.equals(x))
+        if(!isNull(t) && t.element.equals(x))
             return x;
         return null;
     }
@@ -120,7 +183,9 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 
   
     public boolean add(Entry<T> entry) {
-        if(size ==0){
+        if(size == 0)
+        {
+            initMap();
             root = entry;
             size++; return true;
         }
@@ -128,11 +193,19 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
             Entry<T> t = find(entry.element);
             if(t.element.compareTo(entry.element) == 0) return false;
             if(entry.element.compareTo(t.element)<0)
+            {    
+                entry.isLeftChild = true;
                 t.left = entry;
+            }
             else
+            {
+                entry.isLeftChild = false;
                 t.right = entry;
+            }
             size++;
             findPath.push(t);
+            addParent(entry, t);
+            addUncle(entry, t);
             return true;
         }
     }
@@ -155,9 +228,13 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
        if(size == 0) return null;
        Entry<T> t = find(x);
        if(t.element.compareTo(x) != 0) return null;
-      
-       if(t.left == null || t.right == null)
-        splice(t);
+       return remove(t);
+    }
+
+    public T remove(Entry<T> t){
+        T x = t.element;
+        if(isNull(t.left)|| isNull(t.right))
+            splice(t);
        else
        {
            findPath.push(t);
@@ -171,65 +248,68 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 
     protected void leftRotate(Entry<T> x){
         Entry<T> rightChild = x.right;
+
+        rightChild.left.isLeftChild = false;
         x.right = rightChild.left;
-        if(findPath.isEmpty()){
+        addParent(rightChild.left, x);
+
+        Entry<T> parent = parent(x);
+        boolean isLeftChildOfRoot = x.isLeftChild();
+
+        x.isLeftChild = true;
+        rightChild.left = x; 
+
+        addParent(x, rightChild);
+        
+        if(parent == null){
             root = rightChild;
             return;
         }
-        Entry<T> parent = findPath.peek();
         
-        if(isLeftChild(x)){
+        if(isLeftChildOfRoot){
+            rightChild.isLeftChild = true;
             parent.left = rightChild;
+            addParent(rightChild, parent);
+            addUncle(rightChild, parent);
         }
         else{
+            rightChild.isLeftChild = false;
             parent.right = rightChild;
-        }
-        // findPath.push(parent);
+            addParent(rightChild, parent);
+            addUncle(rightChild, parent);
 
+        }
     }
 
     protected void rightRotate(Entry<T> x){
         Entry<T> leftChild = x.left;
+
+        leftChild.right.isLeftChild = true;
         x.left = leftChild.right;
-        Entry<T> parent = findPath.peek();
-        if(findPath.isEmpty()){
+        addParent(leftChild.right,x);
+
+        Entry<T> parent =  parent(x);
+        boolean isLeftChildOfRoot = x.isLeftChild();
+        x.isLeftChild = false;
+        leftChild.right = x;
+        addParent(x, leftChild);
+
+        if(parent == null){
             root = leftChild;
             return;
         }
-        if(isLeftChild(x)){
+        if(isLeftChildOfRoot) { 
+            leftChild.isLeftChild = true;
             parent.left = leftChild;
+            addParent(leftChild, parent);
+            addUncle(leftChild, parent);
         }
         else{
+            leftChild.isLeftChild = false;
             parent.right = leftChild;
+            addParent(leftChild, parent);
+            addUncle(leftChild, parent);
         }
-        // findPath.push(parent);
-    }
-
-
-    protected Boolean isLeftChild(Entry<T> x){
-        Entry<T> parent = findPath.peek();
-        return parent.element.compareTo(x.element) > 0;
-    }
-
-   
-
-    protected Boolean isRightChild(Entry<T> x){
-        Entry<T> parent = findPath.peek();
-        return parent.element.compareTo(x.element) < 0;
-    }
-
-
-    protected Entry<T> uncle(Entry<T> x){
-        Entry<T> parent = findPath.pop();
-        Entry<T> result;
-        if(isLeftChild(parent)){
-            result = findPath.peek().right;
-        }
-        else{
-            result = findPath.peek().left;
-        }
-        findPath.push(parent);
-        return result;
     }
 
     /***
@@ -239,13 +319,23 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
      */
     public void splice(Entry<T> t){
         Entry<T> parent = findPath.peek();
-        Entry<T> child = t.left == null ? t.right : t.left;
-        if(parent == null)
+        Entry<T> child = isNull(t.left) ? t.right : t.left;
+        splicedChild = child;
+        if(isNull(parent))
             root = child;
         else if(parent.left == t)
-            parent.left = child;
+           { 
+               if(!isNull(child)) child.isLeftChild = true;
+               parent.left = child;
+               addParent(child, parent);
+           }
         else 
+          {
+            if(!isNull(child)) child.isLeftChild = false;
             parent.right = child;
+            addParent(child, parent);
+          }
+
     }
 
     /***
@@ -256,7 +346,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         if(size == 0)
             return null;
         Entry<T> t = root;
-        while(t.left != null)
+        while(!isNull(t.left))
             t = t.left;
         return t.element;
     }
@@ -268,7 +358,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         if(size == 0)
         return null;
         Entry<T> t = root;
-        while(t.right != null)
+        while(!isNull(t.right))
             t = t.right;
         return t.element;
     }
@@ -326,7 +416,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 		public T next() {
             Entry<T> t = stack.pop();
             T result = t.element;
-            if(t.right!=null){
+            if(t.right!=null && t.right.element!=null){
                 pushLeftChildrenToStack(t.right);
             }
             return result;
@@ -334,7 +424,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 
         private void pushLeftChildrenToStack(Entry<T> root){
             Entry<T> t = root;
-            while(t !=null){
+            while(t !=null && t.element!=null){
                 stack.push(t);
                 t = t.left;
             }

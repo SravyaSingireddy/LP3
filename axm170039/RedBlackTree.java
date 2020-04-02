@@ -3,6 +3,7 @@
 package axm170039;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
@@ -10,6 +11,7 @@ import java.util.Stack;
 public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchTree<T> {
     private static final boolean RED = true;
     private static final boolean BLACK = false;
+    
 
     static class Entry<T> extends BinarySearchTree.Entry<T> {
         boolean color;
@@ -17,13 +19,6 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
             super(x, left, right);
             color = RED;
         }
-          /***
-         * Contructor
-         * @param x element to be stored in the binary search tree
-         */
-        public Entry(T x) {
-            this(x,null,null);
-         }
 
         boolean isRed() {
 	        return color == RED;
@@ -31,6 +26,13 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
 
         boolean isBlack() {
 	        return color == BLACK;
+        }
+
+        public String toString(){
+            if(element!=null)
+                return (color? "RED ":"BLACK " )+  element.toString();
+            else
+                return "NIL";
         }
 
     }
@@ -43,38 +45,61 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         NIL.color = BLACK;
     }
 
-    protected Entry<T> grandParent(){
-        findPath.pop();
-        return (Entry<T>)findPath.pop();
+    private Entry<T> parent(Entry<T> x){
+        return (Entry<T>)super.parent(x);
+    }
+
+    private Entry<T> uncle(Entry<T> x){
+        return (Entry<T>)super.uncle(x);
+    }
+
+    private Entry<T> sib(Entry<T> x){
+        if(x == root)
+            return null;
+        if(x.isLeftChild()) 
+            return (Entry<T>)parent(x).right;
+        else
+            return (Entry<T>)parent(x).left;
     }
     
+    
     public boolean verifyRBT(){
-        boolean prop1, prop2 = true, prop3 = true, prop4, prop5 = true;
-        
+        boolean prop1,  // The root is black
+                prop2,  // All leaf nodes are black, All leaf nodes are black nil nodes
+                prop3,  // The parent of a red node is black or red parent has black children
+                prop4;  // The number of black nodes on each path from the root to a leaf node is the same
+        HashSet<Entry<T>> leaves = new HashSet<>();
+
         prop1 = ((Entry<T>)(root)).isBlack();
         
         Queue<Entry<T>> bfs = new LinkedList<>(); 
+        prop3 = true; //Initialize
+
         bfs.add((Entry<T>)root);
         while(!bfs.isEmpty() && prop3){
             Entry<T> rt =  bfs.remove();
             if(rt.isRed()) {
-                prop3 = rt.left == null || ((Entry<T>)rt.left).isBlack();
-                prop3 = prop3 && (rt.right == null || ((Entry<T>)rt.right).isBlack());
+                prop3 = ((Entry<T>)rt.left).isBlack();
+                prop3 = prop3 && ((Entry<T>)rt.right).isBlack();
             }
-            if(rt.left!=null)
-              { 
-                   bfs.add((Entry<T>)rt.left);
-              }
-            if(rt.right!=null)
-               {
-                    bfs.add((Entry<T>)rt.right);
-                }
+            
+            if(rt.left != null)
+            { 
+                bfs.add((Entry<T>)rt.left);
+            }
+            if(rt.right != null)
+            {
+                bfs.add((Entry<T>)rt.right);
+            }
+            if(rt.left == null && rt.right == null){
+                leaves.add(rt);
+            }
         }
+       prop2 = leaves.size() == 1;
 
        prop4 = getBlackHeight((Entry<T>)root) != -1;
-      
 
-        return prop1 && prop2 && prop3 && prop4 && prop5;
+       return prop1 && prop2 && prop3 && prop4;
     }
 
     int getBlackHeight(Entry<T> cur){
@@ -91,78 +116,96 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
 
     }
 
-   
+    public T remove(T x)
+    {
+        if(size == 0) return null;
+        Entry<T> t = (Entry<T>)find(x);
+        if(t.element.compareTo(x) != 0) return null;
+        super.remove(t);
+        
+        Entry<T> removedEntry = t; //check if this get changed
+        Entry<T> cursor = (Entry<T>)splicedChild;
+
+        if(removedEntry.isBlack()){
+            fixUp(cursor);
+        }
+        return x;
+    }
+
+    private void fixUp(Entry<T> cursor){
+        Entry<T> sibling, parent;
+        while(cursor != root && cursor.isBlack()){
+            if(cursor.isLeftChild()){
+                sibling = sib(cursor);
+                if(sibling.isRed()){
+                    sibling.color = BLACK;
+                    parent = parent(cursor);
+                    parent.color = RED;
+                    leftRotate(parent);
+                }
+            }
+        }
+    }
 
     public boolean add(T x){
-        Entry<T> cursor = new Entry<T>(x);
+        Entry<T> cursor = new Entry<T>(x,NIL,NIL);
         if(!super.add(cursor))
             return false;
-        while(cursor!=root && size > 3 && ((Entry<T>)findPath.peek()).isRed())
+        Entry<T> parent = parent(cursor);
+        Entry<T> uncle, grandParent;
+        while(cursor!=root && size > 3 && parent.color != BLACK)
         {
-            Entry<T> parent = (Entry<T>)findPath.pop();
-            Entry<T> grandParent;
-            if(isLeftChild(parent)){
-                findPath.push(parent);
-                Entry<T> uncle = (Entry<T>)uncle(cursor);
-                if(uncle.isRed()){
+            if(parent.isLeftChild())
+            {
+                uncle = uncle(cursor);
+                if(uncle.isRed())
+                {
                     parent.color = uncle.color = BLACK;
-                    cursor = grandParent();
+                    cursor = parent(parent);
                     cursor.color = RED;
                 }
-                else{
-                     findPath.push(parent);
-                     if(isRightChild(cursor)){
-                         cursor = (Entry<T>)findPath.pop();
-                         leftRotate(cursor);
-                     }
-                     if(parent!=null)
-                     {
-                     parent = (Entry<T>)findPath.pop();
-                     parent.color = BLACK;
-                     grandParent = (Entry<T>)findPath.pop();
-                     if(grandParent != null){
-                     grandParent.color = RED;
-                     rightRotate(grandParent);
-                     findPath.push(grandParent);
-
-                     }
-                     else
-                        leftRotate(parent);
-                     }
-                     findPath.push(parent);
-
+                else 
+                {
+                    if(cursor.isRightChild())
+                    {
+                        cursor = parent(cursor);
+                        leftRotate(cursor);
+                    }
+                    parent = parent(cursor);
+                    parent.color = BLACK;
+                    grandParent = parent(parent);
+                    if(grandParent != null){
+                        grandParent.color = RED;
+                        rightRotate(grandParent);
+                    }
                 }
             }
-            else {
-                findPath.push(parent);
-                Entry<T> uncle = (Entry<T>)uncle(cursor);
-                if(uncle.isRed()) {
+            else 
+            {
+                uncle = uncle(cursor);
+                if(uncle.isRed())
+                {
                     parent.color = uncle.color = BLACK;
-                    cursor = grandParent();
+                    cursor = parent(parent);
                     cursor.color = RED;
                 }
-                else{
-                     if(isLeftChild(cursor)){
-                         cursor = (Entry<T>)findPath.pop();
-                         rightRotate(cursor);
-                     }
-                     parent = (Entry<T>)findPath.pop();
-                     if(parent!=null)
-                     {
-                     parent.color = BLACK;
-
-                     grandParent = (Entry<T>)findPath.pop();
-                     if(grandParent != null){
+                else
+                {
+                    if(cursor.isLeftChild())
+                    {
+                        cursor = parent(cursor);
+                        rightRotate(cursor);
+                    }
+                    parent = parent(cursor);
+                    parent.color = BLACK;
+                    grandParent = parent(parent);
+                    if(grandParent != null){
                         grandParent.color = RED;
                         leftRotate(grandParent);
-                        findPath.push(grandParent);
                     }
-                    else
-                        leftRotate(parent);
-                        findPath.push(parent);
-                }
                 }
             }
+            parent = parent(cursor);
         }
         ((Entry<T>)root).color = BLACK;
         return true;
@@ -170,27 +213,23 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
 
     public static void main(String args[]){
         RedBlackTree<Integer> rbt = new RedBlackTree<>();
-        rbt.add(39);
-        rbt.add(35);
-        rbt.add(70);
-        rbt.add(20);
-        rbt.add(38);
-        rbt.add(50);
-        rbt.add(75);
-      
-        rbt.add(40);
-        rbt.add(65);
-        rbt.add(80);
-        rbt.add(60);
-        rbt.add(30);
 
-
-
-
-
-
-
+        int[] input = new int[] {7,3,10,22,8,11,26,63,2,23,21,18,20,27,1,5,19};
         
+        System.out.println();
+        for(int i=0;i<input.length;i++){
+            rbt.add(input[i]);
+        }
+        rbt.add(1);
+        
+        for(int i=0;i<input.length;i++){
+            if(!rbt.contains(input[i])){
+                System.out.println("Contains fail : " + input[i]);
+            }
+        }
+
+        System.out.println("VerifyRBT : " +  rbt.verifyRBT());
+
     }
 }
 
