@@ -12,7 +12,8 @@ package axm170039;
 public class Timer {
     long startTime, endTime, elapsedTime, memAvailable, memUsed;
     boolean ready;
-    
+
+   
     public Timer() {
 	startTime = System.currentTimeMillis();
 	ready = false;
@@ -40,6 +41,12 @@ public class Timer {
 	if(!ready) { end(); }
         return "Time: " + elapsedTime + " msec.\n" + "Memory: " + (memUsed/1048576) + " MB / " + (memAvailable/1048576) + " MB.";
     }
+
+    public void setElapsedTime(long elapsedTime) {
+        this.elapsedTime = elapsedTime;
+    }
+    
+    public void scale(int num) { elapsedTime /= num; }
 
 }
 

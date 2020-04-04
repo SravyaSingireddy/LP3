@@ -39,7 +39,7 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
 
     private Entry<T> NIL;
 
-    RedBlackTree() {
+    public RedBlackTree() {
         super();
         NIL = new Entry(null,null,null);
         NIL.color = BLACK;
@@ -57,7 +57,9 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         if(x == root)
             return null;
         if(x.isLeftChild()) 
-            return (Entry<T>)parent(x).right;
+           { 
+               return (Entry<T>)parent(x).right;
+           }
         else
             return (Entry<T>)parent(x).left;
     }
@@ -116,6 +118,13 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
 
     }
 
+    
+    protected void copy(BinarySearchTree.Entry<T> dest, BinarySearchTree.Entry<T> src){
+        super.copy(dest,src);
+        ((Entry<T>)dest).color = ((Entry<T>)src).color;
+    }
+
+
     public T remove(T x)
     {
         if(size == 0) return null;
@@ -123,10 +132,9 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         if(t.element.compareTo(x) != 0) return null;
         super.remove(t);
         boolean splicedEntryColor = ((Entry<T>)splicedEntry).color; 
-        
         Entry<T> cursor = (Entry<T>)splicedChild;
 
-        if(splicedEntryColor == BLACK){
+        if(splicedEntryColor == BLACK) {
             fixUp(cursor);
         }
         return x;
@@ -138,7 +146,6 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
             if(cursor.isLeftChild())
             {
                 sibling = sib(cursor);
-
                 if(sibling.isRed()) // Case 1
                 { 
                     sibling.color = BLACK;
@@ -158,13 +165,14 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
                 }
                 else
                 {
-                    if(sibling_right.isBlack())  // Case 3
+                    if(sibling_left != NIL && sibling_right.isBlack())  // Case 3
                     {
                         sibling_left.color = BLACK;
                         sibling.color = RED;
                         rightRotate(sibling);
                         sibling = sib(cursor);
                     }
+
                     if(sibling == NIL) break;
                     sibling_left = (Entry<T>)sibling.left;
                     sibling_right = (Entry<T>)sibling.right;
@@ -179,13 +187,8 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
             }
             else
             {
-                try{
                 sibling = sib(cursor);
-                }
-                catch(Exception e){
-                    throw e;
-                }
-
+             
                 if(sibling.isRed()) // Case 1
                 {
                     sibling.color = BLACK;
@@ -205,7 +208,7 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
                 }
                 else
                 {
-                    if(sibling_left.isBlack())  // Case 3
+                    if(sibling_right != NIL && sibling_left.isBlack())  // Case 3
                     {
                         sibling_right.color = BLACK;
                         sibling.color = RED;

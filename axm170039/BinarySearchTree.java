@@ -103,13 +103,13 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         return uncles.get(x);
     }
 
-    private void addParent(Entry<T> child, Entry<T> parent){
+    protected void addParent(Entry<T> child, Entry<T> parent){
         if(child != null)
             parents.put(child,parent);
     }
 
     private void addUncle(Entry<T> child, Entry<T> parent){
-        if(!isNull(child))
+        if(child != null)
         {
             Entry<T> grandParent = parent(parent);
             if(grandParent == null){
@@ -136,13 +136,14 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
      * @return the entry of the x if exists in the BST, otherwise null 
      */
     private Entry<T> find(Entry<T> t, T x){
-        if(t == null || t.element.compareTo(x) == 0)
+        if(isNull(t) || t.element.compareTo(x) == 0)
             return t;
         while(true){
             if(x.compareTo(t.element) < 0){
                 if(isNull(t.left)) break;
                 findPath.push(t); 
                 addParent(t.left, t);
+                addParent(t.right, t);
                 addUncle(t.left, t);
                 t = t.left;
             }
@@ -151,6 +152,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
                 if(isNull(t.right)) break;
                 findPath.push(t); 
                 addParent(t.right, t);
+                addParent(t.left, t);
                 addUncle(t.right, t);
                 t = t.right;
             }
@@ -242,11 +244,19 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
        {
            findPath.push(t);
            Entry<T> minRight = find(t.right,x);
-           t.element = minRight.element;
+           copy(t,minRight);
+
+           addParent(t.right, t);
+           addParent(t.left, t);
+        
            splice(minRight);
        } 
        size--;
        return x;    
+    }
+
+    protected void copy(Entry<T> dest, Entry<T> src){
+        dest.element = src.element;
     }
 
     protected void leftRotate(Entry<T> x){
@@ -264,7 +274,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 
         addParent(x, rightChild);
         
-        if(parent == null){
+        if(x == root) {
             root = rightChild;
             return;
         }
@@ -297,7 +307,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         leftChild.right = x;
         addParent(x, leftChild);
 
-        if(parent == null){
+        if(x == root){
             root = leftChild;
             return;
         }
@@ -336,7 +346,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
            }
         else 
           {
-            if(child !=  null) child.isLeftChild = false;
+            if(child != null) child.isLeftChild = false;
             parent.right = child;
             addParent(child, parent);
           }
