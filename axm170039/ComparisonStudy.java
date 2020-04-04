@@ -5,11 +5,11 @@ import java.util.TreeSet;
 
 public class ComparisonStudy {
     public static Random random = new Random();
-    public static int numTrials = 1;
+    public static int numTrials = 20;
     public static void main(String args[])
     {
-        int n = 1 * 100000; 
-        int choice = 2; // 1 - add, 2- remove, 3 - contains
+        int n = 4 * 1000000; 
+        int choice = 1; // 1 - add, 2- remove, 3 - contains
         int methodChoice = 3; // 1- rbt, 2- skiplist, 3 - treeset
         
 	    //Overwrite n and choice if arguments are passed
