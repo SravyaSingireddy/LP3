@@ -9,8 +9,8 @@ public class ComparisonStudy {
     public static void main(String args[])
     {
         int n = 4 * 1000000; 
-        int choice = 1; // 1 - add, 2- remove, 3 - contains
-        int methodChoice = 3; // 1- rbt, 2- skiplist, 3 - treeset
+        int choice = 2; // 1 - add, 2- remove, 3 - contains
+        int methodChoice = 1; // 1- rbt, 2- skiplist, 3 - treeset
         
 	    //Overwrite n and choice if arguments are passed
         if(args.length > 0) { n = Integer.parseInt(args[0]); }
@@ -48,6 +48,7 @@ public class ComparisonStudy {
             case 1: // Add
             timer = new Timer();
             for(int i=0; i<numTrials; i++) {
+                treeSet = new TreeSet<>();
                 Shuffle.shuffle(arr);
                 for(int j=0;j<arr.length;j++){
                     if(!treeSet.add(arr[j])){
@@ -68,6 +69,7 @@ public class ComparisonStudy {
             timer = new Timer();
             for(int i=0; i<numTrials; i++) 
             {
+                treeSet = new TreeSet<>();
                 Shuffle.shuffle(arr);
                 for(int j=0;j<arr.length;j++){
                     if(!treeSet.add(arr[j])){
@@ -95,6 +97,7 @@ public class ComparisonStudy {
             break;
         case 3: // Contains
             Shuffle.shuffle(arr);
+            treeSet = new TreeSet<>();
             for(int j=0;j<arr.length;j++){
                 if(!treeSet.add(arr[j])){
                     System.out.println("Error: Add failed: " + arr[j]);
@@ -133,6 +136,7 @@ public class ComparisonStudy {
             case 1: // Add
             timer = new Timer();
             for(int i=0; i<numTrials; i++) {
+                skipList = new SkipList<>();
                 Shuffle.shuffle(arr);
                 for(int j=0;j<arr.length;j++){
                     if(!skipList.add(arr[j])){
@@ -153,6 +157,7 @@ public class ComparisonStudy {
             timer = new Timer();
             for(int i=0; i<numTrials; i++) 
             {
+                skipList = new SkipList<>();
                 Shuffle.shuffle(arr);
                 for(int j=0;j<arr.length;j++){
                     if(!skipList.add(arr[j])){
@@ -218,6 +223,7 @@ public class ComparisonStudy {
             timer = new Timer();
             for(int i=0; i<numTrials; i++) {
                 Shuffle.shuffle(arr);
+                rbt = new RedBlackTree<>();
                 for(int j=0;j<arr.length;j++){
                     if(!rbt.add(arr[j])){
                         System.out.println("Error: Add failed: " + arr[j]);
