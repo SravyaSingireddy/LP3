@@ -367,6 +367,7 @@ public class ComparisonStudy {
             timer.end();
 		    timer.scale(numTrials);
             System.out.println("Contains - RedBlack Tree");
+            System.out.println("------------------------------------------------------------");
             System.out.println("n: " + arr.length);
             System.out.println(timer);
             break;
