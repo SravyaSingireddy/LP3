@@ -1,12 +1,16 @@
-/* Starter code for LP3 */
-
-// Change this to netid of any member of team
+/**
+ * 
+ * SkipList: Skiplist Implementation
+ * 
+ * @authors (sxr170016)	Srikumar Ramaswamy, (axm170039) Arun Babu Madhavan, (axk180031)	Andry Thomas Kozhikkadan, (sxs180036) Sravya Singireddy
+ * Created as part of Long Project 3 - Implementation of Data Structures (Spring 2020)
+ * 
+ */
 package axm170039;
 
 import java.util.Iterator;
 import java.util.Random;
 
-// Skeleton for skip list implementation.
 public class SkipList<T extends Comparable<? super T>> {
     static final int maxLevel = 32;
     Entry<T> head, tail;
@@ -72,6 +76,10 @@ public class SkipList<T extends Comparable<? super T>> {
         tail.prev = head;
     }
 
+    /***
+     * Find the predecessors for x the path of the traversal is soted in the pred array
+     * @param x value to be found
+     */
     private void findPred(final T x){
         Entry<T> p = head;
         for(int i=p.height()-1;i>=0;i--){
@@ -85,9 +93,14 @@ public class SkipList<T extends Comparable<? super T>> {
         }
     }
 
-    // Add x to list. If x already exists, reject it. Returns true if new node is added to list
+    /***
+     * Add x to list. If x already exists, reject it. Returns true if new node is added to list
+     * @param x entry to be added
+     * @return true of new node is added otherwise false
+     */
     public boolean add(final T x) {
         if(contains(x)) return false;
+       
         final int height = chooseHeight();
         Entry<T> entry= new Entry<>(x,height);
         int dst = span[0];
@@ -109,7 +122,6 @@ public class SkipList<T extends Comparable<? super T>> {
                 pred[i].width[i]  = span[i-1] + 1; //previous level span
             } 
         }
-
         for(int i= height;i<maxLevel+1;i++){
             pred[i].width[i]++;
         }
@@ -119,11 +131,20 @@ public class SkipList<T extends Comparable<? super T>> {
 
     }
 
+    /***
+     * Choose a random height for the node
+     */
     private int chooseHeight(){
-        return 1 + random.nextInt(maxLevel);
+      //  random = new Random();
+        int height = 1 + Integer.numberOfTrailingZeros(random.nextInt());
+        return Math.min(height, maxLevel);
     }
 
-    // Find smallest element that is greater or equal to x
+    /***
+     * Find smallest element that is greater or equal to x
+     * @param x value
+     * @return the smallest element that is greater or equal to x
+     */
     public T ceiling(final T x) {
         if(size == 0)
             return null;
@@ -131,20 +152,31 @@ public class SkipList<T extends Comparable<? super T>> {
         return pred[0].next[0].getElement();
     }
 
-    // Does list contain x?
+    /**
+     * Contains method to check if the list contains x
+     * @param x value
+     * @return true if the list contains x, otherwise false
+     */
     public boolean contains(final T x) {
         findPred(x);
         return pred[0].next[0].getElement() != null && pred[0].next[0].getElement().compareTo(x) == 0;
     }
 
-    // Return first element of list
+    /***
+     * Return first element of list
+     * @return the first element in the list, null if the size of list is zero
+     */
     public T first() {
         if(size == 0)
             return null;
         return head.next[0].getElement();
     }
 
-    // Find largest element that is less than or equal to x
+    /***
+     * Find largest element that is less than or equal to x
+     * @param x value
+     * @return the largest element that is less than or equal to x
+     */
     public T floor(final T x) {
         if(size == 0)
             return null;
@@ -155,7 +187,11 @@ public class SkipList<T extends Comparable<? super T>> {
             return pred[0].getElement();
     }
 
-    // Return element at index n of list.  First element is at index 0.
+    /***
+     * Get the element at index n of list.  First element is at index 0.
+     * @param n index
+     * @return the element at index n
+     */
     public T get(final int n) {
         if(n < 33)
             return getLinear(n);
@@ -163,7 +199,12 @@ public class SkipList<T extends Comparable<? super T>> {
            return getLog(n);
     }
 
-    // O(n) algorithm for get(n)
+    
+    /***
+     * O(n) algorithm for get(n)
+     * @param n
+     * @return the element at index n
+     */
     public T getLinear(final int n) {
         if(n > size - 1) throw new IllegalArgumentException("Invalid index:"+ n);
         Entry<T> p = head;
@@ -172,8 +213,11 @@ public class SkipList<T extends Comparable<? super T>> {
         return p.next[0].getElement();
     }
 
-    // Optional operation: Eligible for EC.
-    // O(log n) expected time for get(n).
+    /***
+     * O(Log(n)) algorithm for get(n)
+     * @param n index
+     * @return the element at index n
+     */
     public T getLog(final int n) {
         if(n > size - 1) throw new IllegalArgumentException("Invalid index:"+ n);
         Entry<T> p = head;
@@ -187,7 +231,10 @@ public class SkipList<T extends Comparable<? super T>> {
         return p.getElement();
     }
 
-    // Is the list empty?
+    /***
+     * To check if the list is empty
+     * @return true of the list is empty otherwise false
+     */
     public boolean isEmpty() {
 	    return size == 0;
     }
@@ -197,7 +244,10 @@ public class SkipList<T extends Comparable<? super T>> {
 	    return null;
     }
 
-    // Return last element of list (optional)
+    /**
+     * Return last element of list
+     * @return the last elment in the list
+     */
     public T last() {
         if(size == 0)
             return null;
@@ -210,7 +260,11 @@ public class SkipList<T extends Comparable<? super T>> {
 	
     }
 
-    // Remove x from list.  Removed element is returned. Return null if x not in list
+    /***
+     * Remove x from list.  
+     * @param x element to be removed
+     * @return Removed element is returned. Return null if x not in list
+     */
     public T remove(final T x) {
         if(!contains(x)) return null;
         Entry<T> entry = pred[0].next[0];
@@ -233,34 +287,12 @@ public class SkipList<T extends Comparable<? super T>> {
         return entry.getElement();
     }
 
-    // Return the number of elements in the list
+    /***
+     * Return the number of elements in the list
+     * @return
+     */
     public int size() {
 	    return size;
-    }
-
-    public static void main(String[] args) 
-	{
-        SkipList<Integer> skiplist = new SkipList<>();
-        skiplist.add(13);
-        skiplist.add(25);
-        skiplist.remove(13);
-          
-        skiplist.add(19);
-        skiplist.add(17);
-        skiplist.remove(25);
-
-        skiplist.add(6);
-
-        skiplist.remove(19);
-      
-
-    System.out.println();
-        for(int i=0;i<skiplist.size();i++)
-             System.out.println(skiplist.get(i));
-             System.out.println();
-            //  for(int i=0;i<skiplist.size();i++)
-            //  System.out.println(skiplist.get(i));
-
     }
 
 }

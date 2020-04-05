@@ -1,3 +1,13 @@
+/**
+ * 
+ * ComparisonStudy: Comparison Study between SkipList, RedBlackTree and Java Tree set
+ * 
+ * This class runs add, remove and contains operation for n different inputs among the three and gives a report on  memory usage and time taken
+ * 
+ * @authors (sxr170016)	Srikumar Ramaswamy, (axm170039) Arun Babu Madhavan, (axk180031)	Andry Thomas Kozhikkadan, (sxs180036) Sravya Singireddy
+ * Created as part of Long Project 3 - Implementation of Data Structures (Spring 2020)
+ * 
+ */
 package axm170039;
 
 import java.util.Random;
@@ -6,10 +16,18 @@ import java.util.TreeSet;
 public class ComparisonStudy {
     public static Random random = new Random();
     public static int numTrials = 20;
+    static int progressPrint = 200000; 
+    /***
+     * 
+     * @param args input arguments
+     *          args[0] - n, input size
+     *          args[1] - choice of operation, 1 - add, 2 - remove, 3 - contains
+     *          args[2] - datatstructure choice 1- rbt, 2- skiplist, 3 - treeset
+     */
     public static void main(String args[])
     {
-        int n = 4 * 1000000; 
-        int choice = 2; // 1 - add, 2- remove, 3 - contains
+        int n = 16 * 1000000; 
+        int choice = 3; // 1 - add, 2 - remove, 3 - contains
         int methodChoice = 1; // 1- rbt, 2- skiplist, 3 - treeset
         
 	    //Overwrite n and choice if arguments are passed
@@ -41,6 +59,11 @@ public class ComparisonStudy {
         }
     }
 
+    /***
+     * Test tree set over the given array, the array values are shuffles and an operation is tested based on the given choice
+     * @param arr input array
+     * @param choice choice of operation  1 - add, 2 - remove, 3 - contains
+     */
     public static void testTreeSet(Long[] arr, int choice){
         TreeSet<Long> treeSet = new TreeSet<>();
         Timer timer;
@@ -55,6 +78,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Add failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Adding " + j + "th element!");
+                    // }
                 }
             }
             timer.end();
@@ -76,6 +102,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Add failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Adding " + j + "th element!");
+                    // }
                 }
                 timer = new Timer();
                 Shuffle.shuffle(arr);
@@ -84,6 +113,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Remove failed: " + arr[j]);
                         return;
                     } 
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Removing " + j + "th element!");
+                    // }
                 }
                 timer.end();
                 timeElapsed = timeElapsed + timer.elapsedTime;
@@ -103,6 +135,9 @@ public class ComparisonStudy {
                     System.out.println("Error: Add failed: " + arr[j]);
                     return;
                 }
+                // if(j%progressPrint == 0){
+                //     System.out.println("Adding " + j + "th element!");
+                // }
             }
             timer = new Timer();
             for(int i=0; i<numTrials; i++) {
@@ -112,6 +147,9 @@ public class ComparisonStudy {
                         System.out.println("Contains failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Checking " + j + "th element!");
+                    // }
                 }
             }
             timer.end();
@@ -129,6 +167,11 @@ public class ComparisonStudy {
 
 
 
+     /***
+     * Test SkipList over the given array, the array values are shuffles and an operation is tested based on the given choice
+     * @param arr input array
+     * @param choice choice of operation  1 - add, 2 - remove, 3 - contains
+     */
     public static void testSkipList(Long[] arr, int choice){
         SkipList<Long> skipList = new SkipList<>();
         Timer timer;
@@ -143,6 +186,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Add failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Adding " + j + "th element!");
+                  //  }
                 }
             }
             timer.end();
@@ -164,6 +210,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Add failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Adding " + j + "th element!");
+                    // }
                 }
                 timer = new Timer();
                 Shuffle.shuffle(arr);
@@ -172,6 +221,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Remove failed: " + arr[j]);
                         return;
                     } 
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Removing " + j + "th element!");
+                    // }
                 }
                 timer.end();
                 timeElapsed = timeElapsed + timer.elapsedTime;
@@ -190,6 +242,9 @@ public class ComparisonStudy {
                     System.out.println("Error: Add failed: " + arr[j]);
                     return;
                 }
+                // if(j%progressPrint == 0){
+                //     System.out.println("Adding " + j + "th element!");
+                // }
             }
             timer = new Timer();
             for(int i=0; i<numTrials; i++) {
@@ -199,6 +254,9 @@ public class ComparisonStudy {
                         System.out.println("Contains failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Checking " + j + "th element!");
+                    // }
                 }
             }
             timer.end();
@@ -214,7 +272,11 @@ public class ComparisonStudy {
 
     }
 
-
+   /***
+     * Test Red Black Tree over the given array, the array values are shuffles and an operation is tested based on the given choice
+     * @param arr input array
+     * @param choice choice of operation  1 - add, 2 - remove, 3 - contains
+     */
     public static void testRBT(Long[] arr, int choice){
         RedBlackTree<Long> rbt = new RedBlackTree<>();
         Timer timer;
@@ -229,11 +291,15 @@ public class ComparisonStudy {
                         System.out.println("Error: Add failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Adding " + j + "th element!");
+                    // }
                 }
             }
             timer.end();
 		    timer.scale(numTrials);
             System.out.println("Add - RedBlack Tree");
+            System.out.println("------------------------------------------------------------");
             System.out.println("n: " + arr.length);
             System.out.println(timer);
             break;
@@ -248,6 +314,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Add failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Adding " + j + "th element!");
+                    // }
                 }
 
                 timer = new Timer();
@@ -257,6 +326,9 @@ public class ComparisonStudy {
                         System.out.println("Error: Remove failed: " + arr[j]);
                         return;
                     } 
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Removing " + j + "th element!");
+                    // }
                 }
                 timer.end();
                 timeElapsed = timeElapsed + timer.elapsedTime;
@@ -264,6 +336,7 @@ public class ComparisonStudy {
             timeElapsed = timeElapsed/numTrials;
             timer.setElapsedTime(timeElapsed);
             System.out.println("Remove - RedBlack Tree");
+            System.out.println("------------------------------------------------------------");
             System.out.println("n: " + arr.length);
             System.out.println(timer);
             break;
@@ -274,6 +347,9 @@ public class ComparisonStudy {
                     System.out.println("Error: Add failed: " + arr[j]);
                     return;
                 }
+                // if(j%progressPrint == 0){
+                //     System.out.println("Adding " + j + "th element!");
+                // }
             }
             timer = new Timer();
             for(int i=0; i<numTrials; i++) {
@@ -283,6 +359,9 @@ public class ComparisonStudy {
                         System.out.println("Contains failed: " + arr[j]);
                         return;
                     }
+                    // if(j%progressPrint == 0){
+                    //     System.out.println("Checking " + j + "th element!");
+                    // }
                 }
             }
             timer.end();

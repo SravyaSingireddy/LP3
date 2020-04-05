@@ -1,33 +1,59 @@
-/** Starter code for Red-Black Tree
+/**
+ * 
+ * Red Black Tree Implementation
+ * 
+ * @authors (sxr170016)	Srikumar Ramaswamy, (axm170039) Arun Babu Madhavan, (axk180031)	Andry Thomas Kozhikkadan, (sxs180036) Sravya Singireddy
+ * Created as part of Long Project 3 - Implementation of Data Structures (Spring 2020)
+ * 
  */
 package axm170039;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Stack;
 
 public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchTree<T> {
     private static final boolean RED = true;
     private static final boolean BLACK = false;
     
 
+     /***
+     * Entry for the Red Black tree
+     * @param <T> Generic type, T extends Entry of the BST.
+     */
     static class Entry<T> extends BinarySearchTree.Entry<T> {
         boolean color;
+
+        /***
+         * Constructor
+         * @param x element to be stored in the red black tree
+         * @param left entry to the left of the rbt
+         * @param right entry to the right of the rbt
+         */
         Entry(T x, Entry<T> left, Entry<T> right) {
             super(x, left, right);
             color = RED;
         }
 
+        /**
+         * Check if the color of the node is Red
+         * @return true of the node is red else false
+         */
         boolean isRed() {
 	        return color == RED;
         }
 
+         /**
+         * Check if the color of the node is Black
+         * @return true of the node is black else false
+         */
         boolean isBlack() {
 	        return color == BLACK;
         }
 
+        /**
+         * to string method to print the element with its color in RBT
+         */
         public String toString(){
             if(element!=null)
                 return (color? "RED ":"BLACK " )+  element.toString();
@@ -37,22 +63,41 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
 
     }
 
+    // NIL node which forms the leaf node in RBT
     private Entry<T> NIL;
 
+    /**
+     * Constructor
+     */
     public RedBlackTree() {
         super();
         NIL = new Entry(null,null,null);
         NIL.color = BLACK;
     }
 
+    /***
+     * Get the parent of the given node
+     * @param x child node
+     * @return parent node of the child, null if x is root
+     */
     private Entry<T> parent(Entry<T> x){
         return (Entry<T>)super.parent(x);
     }
 
+    /***
+     * Get the Uncle of the given node
+     * @param x node
+     * @return the child of the x's grand parent which is not the parent(x)
+     */
     private Entry<T> uncle(Entry<T> x){
         return (Entry<T>)super.uncle(x);
     }
 
+    /***
+     * return the sibling of given node x
+     * @param x node
+     * @return the child of the x's parent which is not equal to x
+     */
     private Entry<T> sib(Entry<T> x){
         if(x == root)
             return null;
@@ -65,6 +110,10 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
     }
     
     
+    /***
+     * Verify the properties of Red black tree 
+     * @return true of all the properties of Red Black tree is satisfied
+     */
     public boolean verifyRBT(){
         boolean prop1,  // The root is black
                 prop2,  // All leaf nodes are black, All leaf nodes are black nil nodes
@@ -104,27 +153,41 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
        return prop1 && prop2 && prop3 && prop4;
     }
 
-    int getBlackHeight(Entry<T> cur){
-        if(cur == null)
+    /***
+     * Recursive function to compute number of black nodes in the subtree from the node to the leaf
+     * @param node root node of the sub tree
+     * @return
+     */
+    int getBlackHeight(Entry<T> node){
+        if(node == null)
             return 0;
         
-        int leftHeight = getBlackHeight((Entry<T>)cur.left);
-        int rightHeight = getBlackHeight((Entry<T>)cur.right);
+        int leftHeight = getBlackHeight((Entry<T>)node.left);
+        int rightHeight = getBlackHeight((Entry<T>)node.right);
         
         if(leftHeight == -1 || rightHeight == -1 || leftHeight!=rightHeight )
             return -1;
         
-        return rightHeight + (cur.isBlack()? 1:0);
+        return rightHeight + (node.isBlack()? 1:0);
 
     }
 
-    
+     /***
+     * Copies element value from source node to destination node
+     * @param dest destination node
+     * @param src source node
+     */
     protected void copy(BinarySearchTree.Entry<T> dest, BinarySearchTree.Entry<T> src){
         super.copy(dest,src);
         ((Entry<T>)dest).color = ((Entry<T>)src).color;
     }
 
 
+    /***
+     * Remove the entry t from the tree
+     * @param t entry to be removed
+     * @return element stored in entry t if it exists, otherwise null
+     */
     public T remove(T x)
     {
         if(size == 0) return null;
@@ -140,6 +203,10 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         return x;
     }
 
+    /**
+     * Fix up fixes the RBT property after deletiion of a black node such that black height of children each node is the tree remains constant
+     * @param cursor the child of the node spliced during delete
+     */
     private void fixUp(Entry<T> cursor){
         Entry<T> sibling, parent, sibling_left, sibling_right;
         while(cursor != root && cursor.isBlack()){
@@ -230,6 +297,11 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         }
     }
 
+     /***
+     * Adds x to the tree
+     * @param x element to be added.
+     * @return true if x is added to the tree, false if x already exists
+     */
     public boolean add(T x){
         Entry<T> cursor = new Entry<T>(x,NIL,NIL);
         if(!super.add(cursor))
@@ -292,37 +364,6 @@ public class RedBlackTree<T extends Comparable<? super T>> extends BinarySearchT
         }
         ((Entry<T>)root).color = BLACK;
         return true;
-    }
-
-    public static void main(String args[]){
-        RedBlackTree<Integer> rbt = new RedBlackTree<>();
-
-      //  int[] input = new int[] {7,3,10,22,8,11,26,63,2,23,21,18,20,27,1,5,19};
-      int[] input = new int[] {47, 32, 71, 65,  87, 51, 82, 93};
-        System.out.println();
-        for(int i=0;i<input.length;i++){
-            rbt.add(input[i]);
-        }
-        rbt.remove(87);
-        //  rbt.remove(63);
-        // rbt.remove(8);
-        // rbt.remove(27);
-        // rbt.remove(11);
-
-
-
-
-
-
-        
-        for(int i=0;i<input.length;i++){
-            if(!rbt.contains(input[i])){
-                System.out.println("Contains fail : " + input[i]);
-            }
-        }
-
-        System.out.println("VerifyRBT : " +  rbt.verifyRBT());
-
     }
 }
 

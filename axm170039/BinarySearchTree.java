@@ -12,7 +12,14 @@ import java.util.Stack;
  *
  * SP7
  * Author: axm170039 (Arun Babu Madhavan), rxs180125 (Rahul Sharma)
+ * 
  * Created as part of Short project 7 - Implementation of Data Structures (Spring 2020)
+ * Added additional features as part of Long Project 3 
+ * 
+ * Sravya Singireddy (SXS180036)
+ * Andry Thomas Kozhikkadan (AXK180031)
+ * Srikumar Ramaswamy(SXR170016)
+ * Arun Babu Madhavan(AXM170039)
  * 
  * Implementation of Binary Search Tree
  *
@@ -75,6 +82,9 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 	    size = 0;
     }
 
+    /***
+     * Helper method to initialize map datastructres for storing parent and uncle
+     */
     private void initMap(){
         findPath  = new Stack<>();
         parents= new HashMap<>();
@@ -94,20 +104,39 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
        return find(root,x);
     }
 
+    /***
+     * Get the parent of the given entry
+     * @param child child entry
+     * @return parent entry of the child, null if child is root
+     */
     protected Entry<T> parent(Entry<T> child){
         return parents.get(child);
     }
 
-    
+    /***
+     * Get the Uncle of the given entry
+     * @param x entry
+     * @return the child of the x's grand parent which is not the parent(x)
+     */
     protected Entry<T> uncle(Entry<T> x){
         return uncles.get(x);
     }
 
+    /***
+     * Add parent to the parent map for the given child key
+     * @param child key entry
+     * @param parent value entry
+     */
     protected void addParent(Entry<T> child, Entry<T> parent){
         if(child != null)
             parents.put(child,parent);
     }
 
+    /***
+     * Compute and add uncle to the given child entry
+     * @param child key entry
+     * @param parent parent of the given child entry
+     */
     private void addUncle(Entry<T> child, Entry<T> parent){
         if(child != null)
         {
@@ -123,11 +152,14 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         }
     }
 
+    /***
+     * Check if the x is null or value of the node is null
+     * @param x entry
+     * @return true of x is null or x.element is null, otherwise false
+     */
     private boolean isNull(Entry<T> x){
         return x == null || x.element == null;
     }
-
-
 
     /***
      * Find the Entry x in the subtree at root t
@@ -184,8 +216,12 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     }
 
 
-  
-    public boolean add(Entry<T> entry) {
+    /***
+     * Adds the entry to the tree
+     * @param entry entry element to be added
+     * @return true if entry is added to the tree, false if entry already exists
+     */
+    protected boolean add(Entry<T> entry) {
         if(size == 0)
         {
             initMap();
@@ -234,6 +270,11 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
        return remove(t);
     }
 
+    /***
+     * Remove the entry t from the tree
+     * @param t entry to be removed
+     * @return element stored in entry t if it exists, otherwise null
+     */
     public T remove(Entry<T> t){
         T x = t.element;
         if(isNull(t.left)|| isNull(t.right))
@@ -255,10 +296,19 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
        return x;    
     }
 
+    /***
+     * Copies element value from source entry to destination entry
+     * @param dest destination entry
+     * @param src source entry
+     */
     protected void copy(Entry<T> dest, Entry<T> src){
         dest.element = src.element;
     }
 
+    /***
+     * Perform a left rotation on the given node x
+     * @param x node to perform left rotate
+     */
     protected void leftRotate(Entry<T> x){
         Entry<T> rightChild = x.right;
 
@@ -294,6 +344,10 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
         }
     }
 
+    /***
+     * Perform a right rotation on the given node x
+     * @param x node to perform right rotate
+     */
     protected void rightRotate(Entry<T> x){
         Entry<T> leftChild = x.left;
 
